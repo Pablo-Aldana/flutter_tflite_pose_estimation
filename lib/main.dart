@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:tflite/tflite.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -21,19 +20,19 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, this.title = ""}) : super(key: key);
   final String title;
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  File _image;
-  List _recognitions;
+  late File _image;
+  late List _recognitions;
   bool selection = false;
-  double _imageHeight;
-  double _imageWidth;
-  ImagePicker imagePicker;
+  late double _imageHeight;
+  late double _imageWidth;
+  late ImagePicker imagePicker;
 
   @override
   void initState() {
@@ -44,24 +43,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //TODO chose image from camera
   _imgFromCamera() async {
-    PickedFile pickedFile =
-    await imagePicker.getImage(source: ImageSource.camera);
-    File image = File(pickedFile.path);
+    PickedFile? pickedFile =
+        await imagePicker.getImage(source: ImageSource.camera);
+    File image = File(pickedFile!.path);
     predictImage(image);
   }
 
   //TODO chose image gallery
   _imgFromGallery() async {
-    PickedFile pickedFile =
-    await imagePicker.getImage(source: ImageSource.gallery);
-    File image = File(pickedFile.path);
+    PickedFile? pickedFile =
+        await imagePicker.getImage(source: ImageSource.gallery);
+    File image = File(pickedFile!.path);
     predictImage(image);
   }
 
   Future loadModel() async {
     Tflite.close();
     try {
-      String res;
+      String? res;
       res = await Tflite.loadModel(
         model: "assets/posenet_mv1_075_float_from_checkpoints.tflite",
         // useGpuDelegate: true,
@@ -74,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future predictImage(File image) async {
     if (image == null) return;
-        poseNet(image);
+    poseNet(image);
 
     new FileImage(image)
         .resolve(new ImageConfiguration())
@@ -100,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print(recognitions);
 
     setState(() {
-      _recognitions = recognitions;
+      _recognitions = recognitions!;
     });
     int endTime = new DateTime.now().millisecondsSinceEpoch;
     print("Inference took ${endTime - startTime}ms");
@@ -149,7 +148,16 @@ class _MyHomePageState extends State<MyHomePage> {
       top: 0.0,
       left: 0.0,
       width: size.width,
-      child: _image == null ? Center(child: Container(margin:EdgeInsets.only(top:size.height/2-140),child: Icon(Icons.image_rounded,color: Colors.white,size: 100,))) : Image.file(_image),
+      child: _image == null
+          ? Center(
+              child: Container(
+                  margin: EdgeInsets.only(top: size.height / 2 - 140),
+                  child: Icon(
+                    Icons.image_rounded,
+                    color: Colors.white,
+                    size: 100,
+                  )))
+          : Image.file(_image),
     ));
     //TODO draw points
     stackChildren.addAll(renderKeypoints(size));
@@ -163,21 +171,21 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              RaisedButton(
+              TextButton(
                 onPressed: _imgFromCamera,
                 child: Icon(
                   Icons.camera,
                   color: Colors.black,
                 ),
-                color: Colors.white,
+                //color: Colors.white,
               ),
-              RaisedButton(
+              TextButton(
                 onPressed: _imgFromGallery,
                 child: Icon(
                   Icons.image,
                   color: Colors.black,
                 ),
-                color: Colors.white,
+                //color: Colors.white,
               ),
             ],
           ),
